@@ -4,9 +4,12 @@
 #include <string>
 #include <vector>
 #include <numeric>
-#include <cstdlib>
 #include <bits/stdc++.h>
 #include <limits>
+#include <fstream>
+#include <random>
+#include <chrono>
+
 #define daugiausia 50
 /// struktura sauganti duomenis apie studenta ir jo pazymius
 struct Studentas1
@@ -14,7 +17,6 @@ struct Studentas1
     std::string vardas, pavarde;
     int egz; int n = 0;
     double galutinis;
-    int C[daugiausia];
     std::vector<int> vektoriukas;
 };
 /// funkcija patikrinanti ar vartotojo ivesti duomenys (siuo atveju simbolis) yra tinkamo formato
@@ -41,178 +43,155 @@ void ar_tinkamas_skaiciukas (int& skaicius, int pradzia, int pabaiga)
         std::cin >> skaicius;
     }
 }
-/// funkcija apskaiciuojanti mesyvo elementu mediana
-double mediana_masyvui(int a[], int n)
+/// funkcija apskaiciuojanti mediana
+double rastimediana (std::vector<int> vekt)
 {
-    std::sort(a, a+n);
-    if (n % 2 != 0)
-       return (double)a[n/2];
-    return (double)(a[(n-1)/2] + a[n/2])/2.0;
+    typedef std::vector<int>::size_type vec_sz;
+    vec_sz size = vekt.size(); std::sort(vekt.begin(), vekt.end());
+    vec_sz mid = size / 2;
+    return (double)(size % 2 == 0 ? ((double)(vekt[mid]) + (double)(vekt[mid-1])) / 2 : (double)(vekt[mid]));
 }
 /// funkcija apskaiciuojanti masyvo elementu vidurki
-double vidurkis (int n, double is_main, int nd[], char kas_cia)
+double vidurkis (int* nd, int n)
 {
-    double suma = 0;
-        if(kas_cia=='a') suma=is_main;
-        else if (kas_cia=='b')
-        {
-             for (int i = 0; i < n; i ++)
-                suma += nd[i];
-        }
-        return (suma / n);
+    double sum = 0;
+    for (int i = 0; i < n; i ++) sum += nd[i];
+    return (sum / n);
 }
 /// funkcija apsakiciuojanti galutini rezultata pagal vartotojo pasirinktus skaiciavimo metodus
-void galutinis (char kas_cia1, char kas_cia2, Studentas1* Studentas, int kelintas, double is_main, double mediana)
+double galutinis (char kas_cia1, Studentas1* Studentas)
 {
     double nd;
-    if(kas_cia2=='b')
-    {
-       if(kas_cia1 == 'm' ) nd = mediana_masyvui(Studentas[kelintas].C, Studentas[kelintas].n);
-            else nd = vidurkis(Studentas[kelintas].n, is_main, Studentas[kelintas].C, kas_cia2);
-    }
-     else if(kas_cia2=='a')
-    {
-      if(kas_cia1 == 'm') nd = (double)mediana;
-           else nd = vidurkis(Studentas[kelintas].n, is_main, Studentas[kelintas].C, kas_cia2); ///S[i].C NEREIKE CIA
-    }
-    Studentas[kelintas].galutinis = (0.4 * nd + 0.6 * Studentas[kelintas].egz);
+      if(kas_cia1 == 'm') nd = rastimediana (Studentas->vektoriukas);
+           else nd = vidurkis(&Studentas->vektoriukas[0], Studentas->vektoriukas.size());
+    return (0.4 * nd + 0.6 * Studentas->egz);
 }
 /// funkcija generuojanti namu darbu ir egzamino balus
-void pazymiu_generavimas (char kas_cia, Studentas1* Studentas, int kelintas, double& suma, double& mediana)
+void pazymiu_generavimas (char kas_cia, Studentas1* Studentas)
 {
-    srand(time(NULL));
-    int galas=0; int kiek=1; suma=0;
-    std::cout << "Generuojamu pazymiu kiekis: "; std::cin >> kiek;
+    int galas=0; int kiek=1;
+    std::cout << "Generuojamu pazymiu kiekis: "; std::cin >> kiek; std::cout<<std::endl;
     ar_tinkamas_skaiciukas (kiek, 1, daugiausia);
-    std::cout << "Namu darbu balai: " ;
+    std::cout << "Namu darbu balai: " ; std::cout<<std::endl;
 
- /// sugeneruotos reiksmes saugomos masyve
- if(kas_cia=='b')
- {
-    do
-    {   Studentas[kelintas].C[Studentas[kelintas].n] = 1+(double)rand ()/ RAND_MAX * 10;
-        std::cout  << Studentas[kelintas].C[Studentas[kelintas].n]<<" " ;
-        Studentas[kelintas].n ++; kiek--;
-    } while (galas != kiek);
- }
-      /// sugeneruotos reiksmes saugomos vektoriuje
-      else if (kas_cia=='a')
-        {
+    using hrClock = std::chrono::high_resolution_clock;
+    std::mt19937 mt(static_cast<long unsigned int>(hrClock::now().time_since_epoch().count()));
+    std::uniform_int_distribution<int> dist(1, 10);
             do
-            {       Studentas[kelintas].vektoriukas.push_back(1+(double)rand ()/ RAND_MAX * 10);
-                    std::cout  << Studentas[kelintas].vektoriukas[Studentas[kelintas].n]<<" " ;
-                    /// apskaiciuojama sugeneruoto vektoriaus elementu suma
-                    suma=std::accumulate(Studentas[kelintas].vektoriukas.begin(), Studentas[kelintas].vektoriukas.end(), 0);
-                    Studentas[kelintas].n ++; kiek--;
+            {       Studentas->vektoriukas.push_back(dist(mt));
+                    std::cout  << Studentas->vektoriukas[Studentas->n]<<" " ;
+                    Studentas->n ++; kiek--;
             } while (galas != kiek);
-                 /// apskaiciuojama sugeneruoto vektoriaus elementu mediana
-                 std::sort(Studentas[kelintas].vektoriukas.begin(), Studentas[kelintas].vektoriukas.end());
-                 if (Studentas[kelintas].n % 2 != 0)
-                 mediana = (double)(Studentas[kelintas].vektoriukas[Studentas[kelintas].n/2])*1.0;
-                 else mediana= (double)(Studentas[kelintas].vektoriukas[(Studentas[kelintas].n-1)/2] + Studentas[kelintas].vektoriukas[Studentas[kelintas].n/2])/2.0;
-        }
-    std::cout<<std::endl;
-    Studentas[kelintas].egz = 1+(double)rand ()/ RAND_MAX * 10;
-    std::cout << "Egzamino balas: " << Studentas[kelintas].egz <<std::endl;;
+
+    std::cout<<std::endl; Studentas->egz = dist(mt);
+    std::cout << "Egzamino balas: " << Studentas->egz <<std::endl; std::cout<<std::endl;
+}
+
+bool rikiuojam(Studentas1 a, Studentas1  b)
+{
+    return a.vardas < b.vardas;
 }
 
 int main ()
 {
-    srand(time(NULL));
-    Studentas1 *Studentas = new Studentas1[daugiausia];
-    char vidurkis_mediana, generuojam, vektorius_masyvas;
-    int kelintas = 0, nd;
-    int jei_nulis_baigiam=1; int sk=1;
-    int nda; double suma=0; double mediana; int studentu_kiek, pabaiga=0;
+    srand(time(NULL)); std::vector<Studentas1> Studentas; std::string kas_vyksta;
+    char vidurkis_mediana, generuojam, vektorius_masyvas, skaitom_ivedam;
+    int kelintas = 0, nd, jei_nulis_baigiam=1, studentu_kiek, pabaiga=0;
 
     /// vatrotojas pasirenka kiek studentu ir kokiais budais apskaiciuoti galutini rezultata
-    std::cout << "Studentu skaicius: "; std::cin >> studentu_kiek;
-    ar_tinkamas_skaiciukas(studentu_kiek, 1, daugiausia);
-
-    std::cout << "vektorius (a) ar masyvas (b)? iveskite 'a' arba 'b' --> "; std::cin >> vektorius_masyvas;
-    ar_tas_simboliukas(vektorius_masyvas, 'a', 'b');
-
-    std::cout << "generuojam (g) ar negeneruojam (n)? iveskite 'g' arba 'n' --> "; std::cin >> generuojam;
-    ar_tas_simboliukas(generuojam, 'g', 'n');
+    /// ar vartotojas nuspres keliu mokiniu duomenis nuskaityti is failo
+    std::cout << "skaitom is failo (s) ar ivedam ranka (i)? iveskite 's' arba 'i' --> "; std::cin >> skaitom_ivedam;
+    ar_tas_simboliukas(skaitom_ivedam, 's', 'i'); std::cout<<std::endl;
 
     std::cout << "vidurkis (v) ar mediana (m)? iveskite 'v' arba 'm' --> "; std::cin >> vidurkis_mediana;
-    ar_tas_simboliukas(vidurkis_mediana, 'm', 'v');
-    std::cout<<std::endl;
+    ar_tas_simboliukas(vidurkis_mediana, 'm', 'v'); std::cout<<std::endl;
 
-    do
-    {   /// ivedamas vartotojaus vardas
-        std::cout << kelintas + 1 << "-studentas-----------------------------------------------" << std::endl;
-        std::cout << "Vardas, pavarde: "; std::cin >> Studentas[kelintas].vardas >> Studentas[kelintas].pavarde;
-        std::cout<<std::endl;
+    if (skaitom_ivedam == 'i')
+    {
+            std::cout << "generuojam (g) ar negeneruojam (n)? iveskite 'g' arba 'n' --> "; std::cin >> generuojam;
+            ar_tas_simboliukas(generuojam, 'g', 'n');
 
-          if(generuojam == 'n')
-            {
-                /// vartotojas iveda namu darbu balus, kurie saugomi masyve
-                if(vektorius_masyvas=='b')
+            std::cout << "Studentu skaicius: "; std::cin >> studentu_kiek;
+            ar_tinkamas_skaiciukas(studentu_kiek, 1, daugiausia);
+    }
+        else if (skaitom_ivedam == 's')
+        {
+            int nd_kiekis_faile = 0; std::ifstream duom ("kursiokai.txt");
+                if (duom.good())
                 {
-                    std::cout << "Po kiekvieno ivesto balo pasapuskite Enter, norint uzbaigti balu ivedinejima - iveskite 0:"<<std::endl;
-                    std::cout << "Namu darbai:"<<std::endl;
-
-                    for(int g=0; g<jei_nulis_baigiam; g++)
+                    std::string str;  std::getline(duom, str);
+                    std::istringstream s (str);  std::string str1;
+                    while (s >> str1) {  nd_kiekis_faile++; }
+                }
+                nd_kiekis_faile -= 3;
+                int i = 0; Studentas1 tmp;
+                while(!duom.eof())
+                {
+                    duom >> tmp.vardas >> tmp.pavarde;
+                    for (int j = 0; j < nd_kiekis_faile; j++)
                     {
-                        std::cin >> nd; ar_tinkamas_skaiciukas(nd, 0, 10);
-                        if (nd == 0) jei_nulis_baigiam = 0;
-                        else
-                        {
-                           Studentas[kelintas].C[Studentas[kelintas].n] = nd; Studentas[kelintas].n++;
-                        }
-                        jei_nulis_baigiam++;
+                            if (duom.fail())
+                            {
+                                duom.clear();
+                                duom.ignore();
+                            }
+                        duom >> nd; tmp.vektoriukas.push_back(nd);
                     }
+                    duom >> tmp.egz;
+                    tmp.galutinis=galutinis(vidurkis_mediana, &tmp);
+                    tmp.vektoriukas.clear(); Studentas.push_back(tmp);
                 }
+                std::sort(Studentas.begin(), Studentas.end(), rikiuojam);
+        }
 
-                /// vartotojas iveda namu darbu balus, kurie saugomi vektoriuje
-                else if (vektorius_masyvas=='a')
+    if (skaitom_ivedam == 'i')
+    {
+        do
+        {   Studentas1 temp;
+            /// ivedamas vartotojaus vardas
+            std::cout << kelintas + 1 << "-studentas-----------------------------------------------" << std::endl;
+            std::cout << "Vardas, pavarde: "; std::cin >> temp.vardas >> temp.pavarde;
+            std::cout<<std::endl;
+
+              if(generuojam == 'n')
                 {
-                    std::cout << "Po kiekvieno ivesto balo pasapuskite Enter, norint uzbaigti balu ivedinejima - iveskite 0:"<<std::endl;
-                    std::cout << "Namu darbai:"<<std::endl;
+                    /// vartotojas iveda namu darbu balus, kurie saugomi vektoriuje
+                        std::cout << "Po kiekvieno ivesto balo pasapuskite Enter, norint uzbaigti balu ivedinejima - iveskite 0:"<<std::endl;
+                        std::cout << "Namu darbai:"<<std::endl;
 
-                 for(int g=0; g<jei_nulis_baigiam; g++)
-                    {
-                        std::cin >> nd;
-                        ar_tinkamas_skaiciukas(nd, 0, 10);
-                        if (nd == 0)
-                            jei_nulis_baigiam = 0;
-                        else
+                     for(int g=0; g<jei_nulis_baigiam; g++)
                         {
-                           Studentas[kelintas].vektoriukas.push_back(nd); Studentas[kelintas].n++;
+                            std::cin >> nd; ar_tinkamas_skaiciukas(nd, 0, 10);
+                            if (nd == 0) jei_nulis_baigiam = 0;
+                            else temp.vektoriukas.push_back(nd); temp.n++;
+                             jei_nulis_baigiam++;
                         }
-                        suma=accumulate(Studentas[kelintas].vektoriukas.begin(),Studentas[kelintas].vektoriukas.end(),0);
-                         jei_nulis_baigiam++;
-                    }
+                       /// vartotojas iveda egzamino bala
+                       std::cout<<std::endl;
+                       std::cout << "Egzamino balas: "; std::cin >> temp.egz;
+                       ar_tinkamas_skaiciukas(temp.egz, 1, 10); std::cout<<std::endl;
                 }
-                   /// vartotojas iveda egzamino bala
-                   std::cout<<std::endl;
-                   std::cout << "Egzamino balas: "; std::cin >> Studentas[kelintas].egz;
-                   ar_tinkamas_skaiciukas(Studentas[kelintas].egz, 1, 10);
-                   std::cout<<std::endl;
-            }
-                /// vartotojas pasirinkimas generuoti namu darbu ir egzamino balus
-                else if (generuojam == 'g')
-                {
-                    pazymiu_generavimas(vektorius_masyvas, Studentas, kelintas, suma, mediana);
-                }
+                    /// vartotojas pasirinkimas generuoti namu darbu ir egzamino balus
+                    else if (generuojam == 'g') pazymiu_generavimas(vektorius_masyvas, &temp);
+            Studentas.push_back(temp); kelintas++; studentu_kiek--;
+        } while (pabaiga!=studentu_kiek);
 
-        kelintas++; studentu_kiek--;
-    } while (pabaiga!=studentu_kiek);
-
+        for (int i = 0; i < Studentas.size(); i ++)
+           Studentas[i].galutinis=galutinis(vidurkis_mediana, &Studentas[i]);
+ }
     std::cout<<std::endl; std::cout<<std::endl;
     std::cout << "Vardas\t\tPavarde\t\t";
     if(vidurkis_mediana == 'm') std::cout << "Galutinis (Med.)" << std::endl;
       else  std::cout << "Galutinis (Vid.)" << std::endl;
-
-    std::cout << "--------------------------------------------------------------" << std::endl;
-
-    for (int i = 0; i < kelintas; i ++)
-    {
-        galutinis(vidurkis_mediana, vektorius_masyvas, Studentas, i, suma, mediana);
-        std::cout << Studentas[i].vardas << "\t\t" << Studentas[i].pavarde << "\t\t" << std::fixed << std::setprecision(2) << Studentas[i].galutinis << std::endl;;
-    }
-
-    delete[] Studentas;
+    std::cout << "-------------------------------------------------------------------" << std::endl;
+            for (int i = 0; i < Studentas.size(); i++)
+            {
+                if (skaitom_ivedam=='s')
+                std::cout << Studentas[i].vardas << " \t" << Studentas[i].pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                Studentas[i].galutinis << " \t " << std::endl;
+                else
+                std::cout << Studentas[i].vardas << "\t\t" << Studentas[i].pavarde << "\t\t"
+                << std::fixed << std::setprecision(2) <<  Studentas[i].galutinis << std::endl;;
+            }
     return 0;
 }
