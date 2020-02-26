@@ -1,6 +1,6 @@
 # Objektinis-Programavimas-2-oji-uzduotis
 
-Programa, nuskaitanti vartotojo įvedamus duomenis ir pateikianti apskaičiuotus rezultatus
+Programa, nuskaitanti vartotojo įvedamus, generuojamus arba iš failo perskaitomus duomenis ir pateikianti apskaičiuotus rezultatus
  
 ## Programos naudojimas ir apibendrintas veikimas 
 Vartotojo veiksmų seka: 
@@ -26,3 +26,7 @@ Pirmoji programos versija
 <br />[v0.2](https://github.com/Makstutyte/Objektinis-Programavimas-2-oji-uzduotis/releases/tag/v0.2) 
 Antroji programos versija
 * Programa apskaiciuojanti galutinius rezultatus pagal vartotojo suvestus, perskaitytus iš failo arba atsitiktinai sugeneruotus duomenis.
+
+<br />[v0.3](https://github.com/Makstutyte/Objektinis-Programavimas-2-oji-uzduotis/releases/tag/v0.3) 
+Trečioji programos versija
+* Programa apskaiciuojanti galutinius rezultatus pagal vartotojo suvestus, perskaitytus iš failo arba atsitiktinai sugeneruotus duomenis, kurioje funkcijos ir struktūra yra laikomi atskiruose antraštiniuose failuose.
