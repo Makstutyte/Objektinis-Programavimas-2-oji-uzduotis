@@ -4,10 +4,10 @@ Programa, nuskaitanti vartotojo įvedamus, generuojamus (atskirus duomenis arba 
  
 ## Programos naudojimas ir apibendrintas veikimas 
 Vartotojo veiksmų seka: 
-1. Vartotojas pasirenka ar bus generuojami nauji duomenų failai
-  * sugeneravus failus vartotojas pasirenka, su kokiu failu bus toliau dirbama
-  * pasirinkus generavima vartotojas pasirenka kaip bus apskaičiuotas galutinis rezultatas (apskaičiuojant namų darbų balų vidurkį ar medianą)
-  * rezultatai bus rikiuojami pagal vardą ar balą
+1. Vartotojas pasirenka ar bus generuojami nauji duomenų failai 
+   *  sugeneravus failus vartotojas pasirenka, su kokiu failu bus toliau dirbama
+   *  pasirinkus generavima vartotojas pasirenka kaip bus apskaičiuotas galutinis rezultatas (apskaičiuojant namų darbų balų vidurkį ar medianą)
+   *  rezultatai bus rikiuojami pagal vardą ar balą
   
  #### Tuo atveju, jei pasirinkta, jog nebus genetuojami nauji duomenų failai
  
