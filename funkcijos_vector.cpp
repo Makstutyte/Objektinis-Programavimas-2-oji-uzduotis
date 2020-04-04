@@ -72,30 +72,33 @@ void I_FAILA_pazymiu_generavimas (Studentas1* Studentas, std::string pavadinimas
             if(pavadinimas=="10000000.txt") ST=10000000;
 
     std::ofstream i_faila(pavadinimas);
-
-    i_faila << "VARDAS \t\t" << "PAVARDE \t";
-    for (int i=0; i<kiek; i++)
-         i_faila<< "ND" << i+1 << "\t";
-    i_faila << "Egz." << std::endl;
-
     using hrClock = std::chrono::high_resolution_clock;
     std::mt19937 mt(static_cast<long unsigned int>(hrClock::now().time_since_epoch().count()));
     std::uniform_int_distribution<int> dist(1, 10);
-int a=0; std::vector<int> vektoriukas;
+    int a=0; std::vector<int> vektoriukas;
 
-          for (int h=0; h<ST; h++)
-          {
-                   i_faila << "Vardas" << h+1 << " \t" << "Pavarde" << h+1 << " \t";
-                        for (int k=0; k<kiek; k++)
-                           {
-                               vektoriukas.push_back(dist(mt));
-                                i_faila  << vektoriukas[a]<<"\t" ;
-                                a ++;
-                           }
-                Studentas->egz = dist(mt);
-                i_faila << Studentas->egz <<std::endl;
-          }
+    std::ostringstream eilutis ("");
+    eilutis << std::setw(20) << std::left << "VARDAS" << std::setw(21) << "PAVARDE";
+    for (int i = 1; i <= kiek; i ++)
+        eilutis << "ND" << std::setw(8) << std::left << i;
+    eilutis << "Egz.\n";
+    i_faila << eilutis.str();   
 
+    for (int i = 0; i < ST; i ++) 
+    {
+        eilutis.str(""); 
+        eilutis << "Vardas" << std::setw(14) << std::left << i+1 << "Pavarde" << std::setw(14) << std::left << i+1;
+        for (int j = 0; j < kiek; j ++)
+        {
+             vektoriukas.push_back(dist(mt));
+             eilutis  << std::setw(10) << std::left << vektoriukas[a];
+             a ++;
+        }
+             Studentas->egz = dist(mt);
+             eilutis << Studentas->egz;
+             eilutis << "\n";
+        i_faila << eilutis.str();
+    }
             std::cout<<std::endl; std::cout << pavadinimas << "  failo kurimas uztruko ->  " ;
             std::cout << t.elapsed() <<std::endl;
 }
@@ -267,9 +270,17 @@ void vektorius()
                 int opa=dydis;
                 if(i_faila_ar_ne=='t') opa=dydis-1;
                 nevykeliai2.reserve(opa); vykeliai2.reserve(opa);
-                int kiek1 = 0;  int kiek2 = 0; Timer t, p; 
+                int kiek1 = 0;  int kiek2 = 0; Timer t1, p; 
+                int strategija; char papildomi_algoritmai;
 
-            {
+            std::cout << "1 strategija / 2 strategija ? --> "; std::cin >> strategija;
+            ar_tinkamas_skaiciukas(strategija, 1, 2);
+            std::cout << "naudojame papildomus algoritmus (t) / ne (n)? --> "; std::cin >> papildomi_algoritmai;
+            ar_tas_simboliukas(papildomi_algoritmai, 't', 'n');
+
+
+            if(strategija==1 && papildomi_algoritmai=='n' )
+            { Timer t;
                 for (int i = 0; i < opa; i++)
                 {
                     if ( Studentas[i].galutinis<5.0)
@@ -286,67 +297,185 @@ void vektorius()
 
             }
 
+             if(strategija==1 && papildomi_algoritmai=='t')
+            {
+                Timer t;
+                kiek2 = count_if (Studentas.begin(), Studentas.end(), [](Studentas1 x)
+                { 
+                    return x.galutinis>=5.0; 
+                    
+                }); 
+                kiek2=kiek2-1;
+                vykeliai2.resize(kiek2);  
+                nevykeliai2.resize(Studentas.size()-kiek2); 
+
+                std::partition_copy(Studentas.begin(), Studentas.end(), vykeliai2.begin(), nevykeliai2.begin(), [](Studentas1 x)
+                { 
+                    return x.galutinis<5.0; 
+                }); 
+                kiek1= Studentas.size()-kiek2;
+                std::cout << std::endl;  
+                                    std::cout << "Studentu rusiavimas i dvi grupes uztruko ->  " ;
+                                    std::cout << t.elapsed() <<std::endl;
+            }
+
+else if(strategija==2 && papildomi_algoritmai=='n')
+    {
+        Timer t;
+        std::sort(Studentas.begin(), Studentas.end(), [](Studentas1 &a, Studentas1 &b) 
+        {
+            return a.galutinis < b.galutinis;
+        }); 
+
+        int ne = 0;
+        while (Studentas[ne].galutinis < 5.0 && ne != Studentas.size())
+            ne ++;
+
+        vykeliai2.reserve(Studentas.size() - ne);
+        std::copy(Studentas.begin() + ne, Studentas.end(), std::back_inserter(vykeliai2));
+        Studentas.resize(ne);
+        Studentas.shrink_to_fit();
+
+        std::cout << "Studentu rusiavimas i dvi grupes uztruko ->  " ;
+        std::cout << t.elapsed() <<std::endl;
+        kiek2=ne;
+    }
+
+else if(strategija==2 && papildomi_algoritmai=='t')
+    {
+        Timer t;
+            auto ne = std::partition (Studentas.begin(), Studentas.end(), [](Studentas1 &i)
+            {
+                return (i.galutinis < 5);
+            });
+
+            vykeliai2.reserve(Studentas.end() - ne);
+            std::copy(ne, Studentas.end(), std::back_inserter(vykeliai2));
+            Studentas.resize(ne - Studentas.begin());
+            kiek2=vykeliai2.size();
+            Studentas.shrink_to_fit();
+
+        std::cout << "Studentu rusiavimas i dvi grupes uztruko ->  " ;
+        std::cout << t.elapsed() <<std::endl;
+    }
                   if(rusiuojame == 'b')
                   {
-                       std::sort(vykeliai2.begin(), vykeliai2.end(), rikiuojam_pagal_bala);
-                       std::sort(nevykeliai2.begin(), nevykeliai2.end(), rikiuojam_pagal_bala);
+                      if (strategija==1)
+                      {
+                            std::sort(vykeliai2.begin(), vykeliai2.end(), rikiuojam_pagal_bala);
+                             std::sort(nevykeliai2.begin(), nevykeliai2.end(), rikiuojam_pagal_bala);
+                      }
+                       
+                       else if (strategija==2)
+                       {
+                           std::sort(vykeliai2.begin(), vykeliai2.end(), rikiuojam_pagal_bala);
+                            std::sort(Studentas.begin(), Studentas.end(), rikiuojam_pagal_bala);   
+                       }
                   }
 
                    else
                    {
-                       std::sort(vykeliai2.begin(), vykeliai2.end(), rikiuojam);
-                       std::sort(nevykeliai2.begin(), nevykeliai2.end(), rikiuojam);
+                        if (strategija==1)
+                        {
+                            std::sort(vykeliai2.begin(), vykeliai2.end(), rikiuojam);
+                            std::sort(nevykeliai2.begin(), nevykeliai2.end(), rikiuojam);
+                        }
+                       
+                        else if (strategija==2)
+                        {
+                            std::sort(vykeliai2.begin(), vykeliai2.end(), rikiuojam);
+                            std::sort(Studentas.begin(), Studentas.end(), rikiuojam);
+                        }
                    }
 
-                   
-                    if (kiek2!=0)
-                    {
                         vykeliai << "Vardas \t\tPavarde \t";
                         if(vidurkis_mediana == 'm') vykeliai << "Galutinis (Med.)" << std::endl;
                         else  vykeliai << "Galutinis (Vid.)" << std::endl;
                         vykeliai << "-------------------------------------------------------------------" << std::endl;
-                    }
-                        
-                    if (kiek1!=0)
-                    {
+                  
                         nevykeliai << "Vardas \t\tPavarde \t";
                         if(vidurkis_mediana == 'm') nevykeliai << "Galutinis (Med.)" << std::endl;
                         else  nevykeliai << "Galutinis (Vid.)" << std::endl;
                         nevykeliai << "-------------------------------------------------------------------" << std::endl;
-                    }
+                    
 
                 if(i_faila_ar_ne=='n' && skaitom_ivedam=='i')
                 {
-                    for(int j=0; j<kiek2; j++)
+                    if (strategija==1)
+                    {
+                       for(int j=0; j<kiek2; j++)
                         vykeliai << vykeliai2[j].vardas << " \t\t" << vykeliai2[j].pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
-                        vykeliai2[j].galutinis << std::endl;
+                        vykeliai2[j].galutinis << std::endl;  
 
-                    for (int k = 0; k<kiek1; k++)
+                        for (int k = 0; k<kiek1; k++)
                          nevykeliai << nevykeliai2[k].vardas << " \t\t" << nevykeliai2[k].pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
                          nevykeliai2[k].galutinis << std::endl;
+                    }
+                    
+                    else if (strategija==2)
+                    {
+    
+                         for (int k = 0; k<kiek2; k++)
+                         vykeliai << vykeliai2[k].vardas << " \t\t" << vykeliai2[k].pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
+                         vykeliai2[k].galutinis << std::endl;
+
+                         for(int j=0; j<Studentas.size(); j++)
+                        nevykeliai << Studentas[j].vardas << " \t\t" << Studentas[j].pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
+                        Studentas[j].galutinis << std::endl; 
+                         
+                    }
 
                 }
 
                 else if(i_faila_ar_ne=='n' && skaitom_ivedam=='s')
                 {
-                    for(int j=0; j<kiek2; j++)
+                    if (strategija==1)
+                    {
+                        for(int j=0; j<kiek2; j++)
                         vykeliai << vykeliai2[j].vardas << " \t" << vykeliai2[j].pavarde << " \t" << std::fixed << std::setprecision(2) <<
-                        vykeliai2[j].galutinis << std::endl;
+                        vykeliai2[j].galutinis << std::endl; 
 
-                    for (int k = 0; k<kiek1; k++)
+                        for (int k = 0; k<kiek1; k++)
                          nevykeliai << nevykeliai2[k].vardas << " \t" << nevykeliai2[k].pavarde << " \t" << std::fixed << std::setprecision(2) <<
                          nevykeliai2[k].galutinis << std::endl;
+                    }
+                   
+                    else if (strategija==2)
+                    {
+                         for (int k = 0; k<kiek2; k++)
+                         vykeliai << vykeliai2[k].vardas << " \t" << vykeliai2[k].pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                         vykeliai2[k].galutinis << std::endl;
+
+                         for(int j=0; j<Studentas.size(); j++)
+                        nevykeliai << Studentas[j].vardas << " \t" << Studentas[j].pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                        Studentas[j].galutinis << std::endl; 
+                    }
+                    
                 }
 
                 else if (i_faila_ar_ne=='t')
                 {
-                    for(int j=0; j<kiek2; j++)
+                    if (strategija==1)
+                    {
+                         for(int j=0; j<kiek2; j++)
                         vykeliai << vykeliai2[j].vardas << " \t" << vykeliai2[j].pavarde << "\t" << std::fixed << std::setprecision(2) <<
                         vykeliai2[j].galutinis << std::endl;
 
-                    for (int k = 0; k<kiek1; k++)
+                        for (int k = 0; k<kiek1; k++)
                          nevykeliai << nevykeliai2[k].vardas << " \t" << nevykeliai2[k].pavarde << "\t" << std::fixed << std::setprecision(2) <<
                          nevykeliai2[k].galutinis << std::endl;
+                    }
+                      
+                    else if (strategija==2)
+                    {
+                         for (int k = 0; k<kiek2; k++)
+                         vykeliai << vykeliai2[k].vardas << " \t" << vykeliai2[k].pavarde << "\t" << std::fixed << std::setprecision(2) <<
+                         vykeliai2[k].galutinis << std::endl;
+
+                         for(int j=0; j<Studentas.size(); j++)
+                        nevykeliai << Studentas[j].vardas << " \t" << Studentas[j].pavarde << "\t" << std::fixed << std::setprecision(2) <<
+                        Studentas[j].galutinis << std::endl; 
+                    }
                 }
 }
 std::cout <<std::endl;
