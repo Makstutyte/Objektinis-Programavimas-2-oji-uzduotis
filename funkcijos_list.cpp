@@ -67,7 +67,6 @@ void pazymiu_generavimasL (char vidurkis_mediana, Studentas2* Studentas)
 
 }
 
-
 bool rikiuojamL (Studentas2 a, Studentas2  b)
 {
     return a.vardas < b.vardas;
@@ -86,29 +85,31 @@ void I_FAILA_pazymiu_generavimasL (Studentas2* Studentas, std::string pavadinima
             if(pavadinimas=="10000000.txt") ST=10000000;
 
     std::ofstream i_faila(pavadinimas);
-
-    i_faila << "VARDAS \t\t" << "PAVARDE \t";
-    for (int i=0; i<kiek; i++)
-         i_faila<< "ND" << i+1 << "\t";
-    i_faila << "Egz." << std::endl;
-
     using hrClock = std::chrono::high_resolution_clock;
     std::mt19937 mt(static_cast<long unsigned int>(hrClock::now().time_since_epoch().count()));
     std::uniform_int_distribution<int> dist(1, 10);
-int a=0; std::vector<int> vektoriukas;
+    int a=0; std::list<int> vektoriukas;
 
-          for (int h=0; h<ST; h++)
-          {
-                   i_faila << "Vardas" << h+1 << " \t" << "Pavarde" << h+1 << " \t";
-                        for (int k=0; k<kiek; k++)
-                           {
-                               vektoriukas.push_back(dist(mt));
-                                i_faila  << vektoriukas[a]<<"\t" ;
-                                a ++;
-                           }
-                Studentas->egz = dist(mt);
-                i_faila << Studentas->egz <<std::endl;
-          }
+    std::ostringstream eilutis ("");    
+    eilutis << std::setw(20) << std::left << "VARDAS" << std::setw(21) << "PAVARDE";
+    for (int i = 1; i <= kiek; i ++)
+        eilutis << "ND" << std::setw(8) << std::left << i;
+    eilutis << "Egz.\n";
+    i_faila << eilutis.str();
+    for (int i = 0; i < ST; i ++) 
+    {
+        eilutis.str("");   
+        eilutis << "Vardas" << std::setw(14) << std::left << i+1 << "Pavarde" << std::setw(14) << std::left << i+1;
+        for (int j = 0; j < kiek; j ++)
+        {
+             vektoriukas.push_back(dist(mt));
+             eilutis << std::setw(10) << std::left << vektoriukas.back();
+        }
+             Studentas->egz = dist(mt);
+             eilutis << Studentas->egz;
+        eilutis << "\n";
+        i_faila << eilutis.str();
+    }
 
             std::cout<<std::endl; std::cout << pavadinimas << "  failo kurimas uztruko ->  " ;
             std::cout << t.elapsed() <<std::endl;
@@ -270,8 +271,7 @@ void listas()
 
          for (auto itr = Studentas.begin(); itr != Studentas.end(); itr++) 
             itr->galutinis=galutinisL(vidurkis_mediana, &*itr);    
- 
-            
+      
  }
  
  int dydis=Studentas.size();
@@ -282,9 +282,16 @@ void listas()
                 std::ofstream nevykeliai ("nevykeliai.txt");
                 int opa=dydis;
                 if(i_faila_ar_ne=='t') opa=dydis-1;
-                int kiek1 = 0;  int kiek2 = 0; Timer t, p; 
+                int kiek1 = 0;  int kiek2 = 0;
+                int strategija;
 
-                for (auto itr = Studentas.begin(); itr != Studentas.end(); itr++)
+            std::cout << "1 strategija / 2 strategija ? --> "; std::cin >> strategija;
+            ar_tinkamas_skaiciukas(strategija, 1, 2);
+
+
+            if(strategija==1)
+            { Timer t;
+                    for (auto itr = Studentas.begin(); itr != Studentas.end(); itr++)
                 {
                     if ( itr->galutinis<5.0)
                     {
@@ -298,75 +305,161 @@ void listas()
                 }     
                         std::cout << "Studentu rusiavimas i dvi grupes uztruko ->  " ;
                         std::cout << t.elapsed() <<std::endl;
+            }
 
+ else if(strategija==2)
+{ Timer o;
+     int ne = 0;
+    /// Studentas.sort(rikiuojam_pagal_balaL);
+     Studentas.sort([](Studentas2 &a, Studentas2 &b) 
+     {
+         return a.galutinis < b.galutinis;
+     });
+
+    auto i = Studentas.begin();
+    while (i->galutinis < 5.0 && i != Studentas.end()) 
+    {
+            ne ++;
+            i ++;
+    }
+    vykeliai2.assign(i, Studentas.end());  Studentas.clear();
+    Studentas.resize(ne);  
+    kiek2=ne;
+    std::cout << "Studentu rusiavimas i dvi grupes uztruko ->  " ;
+    std::cout << o.elapsed() <<std::endl;
+}
                   if(rusiuojame == 'b')
                   {
-                       vykeliai2.sort(rikiuojam_pagal_balaL);
-                       nevykeliai2.sort(rikiuojam_pagal_balaL);
+                      if (strategija==1)
+                      {
+                        vykeliai2.sort(rikiuojam_pagal_balaL);
+                        nevykeliai2.sort(rikiuojam_pagal_balaL);
+                      }
+                       
+                       else if (strategija==2)
+                       {
+                           vykeliai2.sort(rikiuojam_pagal_balaL);
+                           Studentas.sort(rikiuojam_pagal_balaL);
+                       }
                   }
 
                    else
                    {
-                       vykeliai2.sort(rikiuojamL);
-                       nevykeliai2.sort(rikiuojamL);
+                        if (strategija==1)
+                        {
+                             vykeliai2.sort(rikiuojamL);
+                             nevykeliai2.sort(rikiuojamL);
+                        }
+                       
+                        else if (strategija==2)
+                        {
+                             vykeliai2.sort(rikiuojamL);
+                             Studentas.sort(rikiuojamL);
+                        }
                    }
-                    
 
-                   
-                    if (kiek2!=0)
-                    {
                         vykeliai << "Vardas \t\tPavarde \t";
                         if(vidurkis_mediana == 'm') vykeliai << "Galutinis (Med.)" << std::endl;
                         else  vykeliai << "Galutinis (Vid.)" << std::endl;
                         vykeliai << "-------------------------------------------------------------------" << std::endl;
-                    }
                         
-                    if (kiek1!=0)
-                    {
                         nevykeliai << "Vardas \t\tPavarde \t";
                         if(vidurkis_mediana == 'm') nevykeliai << "Galutinis (Med.)" << std::endl;
                         else  nevykeliai << "Galutinis (Vid.)" << std::endl;
                         nevykeliai << "-------------------------------------------------------------------" << std::endl;
-                    }
 
                 if(i_faila_ar_ne=='n' && skaitom_ivedam=='i')
                 {
-                    auto it = vykeliai2.begin();
-                    for (auto it = vykeliai2.begin(); it != vykeliai2.end(); ++it) 
-                        vykeliai << it->vardas << " \t\t" << it->pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
-                        it->galutinis << std::endl;
- 
-                    auto iti = nevykeliai2.begin();
-                    for (auto iti = nevykeliai2.begin(); iti != nevykeliai2.end(); ++iti) 
-                        nevykeliai << iti->vardas << " \t\t" << iti->pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
-                        iti->galutinis << std::endl;
+                     if (strategija==1)
+                     {
+                        auto it = vykeliai2.begin();
+                        for (auto it = vykeliai2.begin(); it != vykeliai2.end(); ++it) 
+                            vykeliai << it->vardas << " \t\t" << it->pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
+                            it->galutinis << std::endl;
+    
+                        auto iti = nevykeliai2.begin();
+                        for (auto iti = nevykeliai2.begin(); iti != nevykeliai2.end(); ++iti) 
+                            nevykeliai << iti->vardas << " \t\t" << iti->pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
+                            iti->galutinis << std::endl;
+                     }
 
+                    else if (strategija==2)
+                    {
+    
+                        auto it = vykeliai2.begin();
+                        for (auto it = vykeliai2.begin(); it != vykeliai2.end(); ++it) 
+                            vykeliai << it->vardas << " \t\t" << it->pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
+                            it->galutinis << std::endl;
+
+
+                        auto iti = Studentas.begin();
+                        for (auto iti = Studentas.begin(); iti != Studentas.end(); ++iti) 
+                            nevykeliai << iti->vardas << " \t\t" << iti->pavarde << " \t\t" << std::fixed << std::setprecision(2) <<
+                            iti->galutinis << std::endl;
+                         
+                    }
                 }
 
                 else if(i_faila_ar_ne=='n' && skaitom_ivedam=='s')
                 {
-                    auto it = vykeliai2.begin();
-                     for (auto it = vykeliai2.begin(); it != vykeliai2.end(); ++it) 
-                        vykeliai << it->vardas << " \t" << it->pavarde << " \t" << std::fixed << std::setprecision(2) <<
-                        it->galutinis << std::endl;
- 
-                    auto iti = nevykeliai2.begin();
-                    for (auto iti = nevykeliai2.begin(); iti != nevykeliai2.end(); ++iti) 
-                        nevykeliai << iti->vardas << " \t" << iti->pavarde << " \t" << std::fixed << std::setprecision(2) <<
-                        iti->galutinis << std::endl;     
+                     if (strategija==1)
+                     {
+                        auto it = vykeliai2.begin();
+                        for (auto it = vykeliai2.begin(); it != vykeliai2.end(); ++it) 
+                            vykeliai << it->vardas << " \t" << it->pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                            it->galutinis << std::endl;
+    
+                        auto iti = nevykeliai2.begin();
+                        for (auto iti = nevykeliai2.begin(); iti != nevykeliai2.end(); ++iti) 
+                            nevykeliai << iti->vardas << " \t" << iti->pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                            iti->galutinis << std::endl;
+                     }
+
+                    else if (strategija==2)
+                    {
+    
+                        auto it = vykeliai2.begin();
+                        for (auto it = vykeliai2.begin(); it != vykeliai2.end(); ++it) 
+                            vykeliai << it->vardas << " \t" << it->pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                            it->galutinis << std::endl;
+
+
+                        auto iti = Studentas.begin();
+                        for (auto iti = Studentas.begin(); iti != Studentas.end(); ++iti) 
+                            nevykeliai << iti->vardas << " \t" << iti->pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                            iti->galutinis << std::endl;
+                    }
                 }
 
                 else if (i_faila_ar_ne=='t')
                 {
-                    auto it = vykeliai2.begin();
-                      for (auto it = vykeliai2.begin(); it != vykeliai2.end(); ++it) 
-                        vykeliai << it->vardas << " \t" << it->pavarde << " \t" << std::fixed << std::setprecision(2) <<
-                        it->galutinis << std::endl;
+                    if (strategija==1)
+                     {
+                        auto it = vykeliai2.begin();
+                        for (auto it = vykeliai2.begin(); it != vykeliai2.end(); ++it) 
+                            vykeliai << it->vardas << " \t" << it->pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                            it->galutinis << std::endl;
+    
+                        auto iti = nevykeliai2.begin();
+                        for (auto iti = nevykeliai2.begin(); iti != nevykeliai2.end(); ++iti) 
+                            nevykeliai << iti->vardas << " \t" << iti->pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                            iti->galutinis << std::endl;
+                     }
 
-                    auto iti = nevykeliai2.begin();
-                    for (auto iti = nevykeliai2.begin(); iti != nevykeliai2.end(); ++iti) 
-                        nevykeliai << iti->vardas << " \t" << iti->pavarde << " \t" << std::fixed << std::setprecision(2) <<
-                        iti->galutinis << std::endl;     
+                    else if (strategija==2)
+                    {
+    
+                        auto it = vykeliai2.begin();
+                        for (auto it = vykeliai2.begin(); it != vykeliai2.end(); ++it) 
+                            vykeliai << it->vardas << " \t" << it->pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                            it->galutinis << std::endl;
+
+
+                        auto iti = Studentas.begin();
+                        for (auto iti = Studentas.begin(); iti != Studentas.end(); ++iti) 
+                            nevykeliai << iti->vardas << " \t" << iti->pavarde << " \t" << std::fixed << std::setprecision(2) <<
+                            iti->galutinis << std::endl;    
+                    }    
                 }
 }
 std::cout <<std::endl;
