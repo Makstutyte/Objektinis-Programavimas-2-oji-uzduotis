@@ -193,6 +193,6 @@ Programa taip pat skirsto duomenis pagal galutinį balą ir atspausdina juos dvi
 Penktoji programos versija
 * Programa, kuri leidžia vartotojui pasirinkti, kokiame STL konteineryje (vector, list ar deque) bus saugomi duomenys, bei apskaiciuojanti galutinius rezultatus pagal vartotojo suvestus, perskaitytus iš failo arba atsitiktinai sugeneruotus duomenis.
 
-<br />[v1.0](https://github.com/Makstutyte/Objektinis-Programavimas-2-oji-uzduotis/releases/tag/v1.0) 
+<br />[v1.0](https://github.com/Makstutyte/Objektinis-Programavimas-2-oji-uzduotis/releases/tag/v1.0.1) 
 Šeštoji programos versija
 * Programa, kuri leidžia vartotojui pasirinkti, kokiame STL konteineryje (vector, list ar deque) bus saugomi duomenys, pasirinkti pagal, kokią strategiją bus suskirstyti failai.
