@@ -163,6 +163,8 @@ Duomenų rūšiavimo laikų ir naudojant std::vector konteinerį palyginimas:
 Naudojami algoritmai:
 * std::copy
 * std::partition
+
+
 Algoritmų naudojimas paspartina duomenų išrūšiavimą į dvi atskiras grupes pagal galutinį balą.
 
 ## Releases 
